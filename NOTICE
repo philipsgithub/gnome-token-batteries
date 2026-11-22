@@ -1,0 +1,15 @@
+Token Batteries
+Copyright (C) gnome-token-batteries contributors
+
+The code is licensed under the GNU General Public License, version 2 or (at your
+option) any later version. See LICENSE.
+
+The icons in icons/, and the battery outline embedded in make-icons.py, are adapted
+from the battery-level-*-charging-symbolic icons of the Yaru icon theme
+(https://github.com/ubuntu/yaru), Copyright 2018 Sam Hewitt, licensed under
+CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). The bolt was replaced
+by a service glyph and the charge level redrawn. These adapted icons are licensed
+under CC BY-SA 4.0 as well.
+
+This project is not affiliated with or endorsed by Anthropic, OpenAI or Canonical.
+Claude, Codex and ChatGPT are trademarks of their respective owners.

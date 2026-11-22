@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.token-batteries" path="/org/gnome/shell/extensions/token-batteries/">
+    <key name="claude-five-hour" type="b">
+      <default>true</default>
+      <summary>Show the Claude 5-hour battery in the top bar</summary>
+    </key>
+    <key name="claude-weekly" type="b">
+      <default>true</default>
+      <summary>Show the Claude weekly battery in the top bar</summary>
+    </key>
+    <key name="codex-five-hour" type="b">
+      <default>true</default>
+      <summary>Show the Codex 5-hour battery in the top bar</summary>
+    </key>
+    <key name="codex-weekly" type="b">
+      <default>true</default>
+      <summary>Show the Codex weekly battery in the top bar</summary>
+    </key>
+    <key name="only-while-running" type="b">
+      <default>true</default>
+      <summary>Show a service's batteries only while one of its CLI sessions runs</summary>
+      <description>Sessions are reported by hooks/session-hook.sh (see install-hooks.py). When no checked battery belongs to a running CLI, the indicator is hidden.</description>
+    </key>
+  </schema>
+</schemalist>
