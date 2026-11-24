@@ -33,6 +33,12 @@ while [ "$depth" -lt 12 ] && [ "$pid" -gt 1 ] 2>/dev/null; do
 done
 [ "$(cat "/proc/$pid/comm" 2>/dev/null)" = "$cli" ] || exit 0
 
+# Codex's background server hosts several sessions under one mark, so one session
+# ending must not remove it. The extension drops it when no Codex terminal is left.
+if [ "$event" = end ] && [ "$(tr '\0' '\n' <"/proc/$pid/cmdline" 2>/dev/null | sed -n 2p)" = app-server ]; then
+    exit 0
+fi
+
 case $event in
     start) mkdir -p "$dir/running" 2>/dev/null && : >"$dir/running/$cli-$pid" 2>/dev/null ;;
     end) rm -f "$dir/running/$cli-$pid" 2>/dev/null ;;

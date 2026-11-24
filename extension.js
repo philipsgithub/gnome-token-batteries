@@ -176,6 +176,35 @@ async function processName(pid) {
     }
 }
 
+// The pids of this user's processes
+async function ownPids() {
+    const uid = new Gio.Credentials().get_unix_user();
+    return (await listDir('/proc', 'standard::name,unix::uid'))
+        .filter(info => /^\d+$/.test(info.get_name()) &&
+            info.get_attribute_uint32('unix::uid') === uid)
+        .map(info => info.get_name());
+}
+
+// Codex's shared background server (codex app-server) runs the hooks of all its
+// terminals and outlives them without a SessionEnd, so a mark on it says nothing
+// about whether a session is still open
+async function isCodexServer(pid) {
+    try {
+        const [bytes] = await Gio.File.new_for_path(`/proc/${pid}/cmdline`).load_contents_async(null);
+        return new TextDecoder().decode(bytes).split('\0')[1] === 'app-server';
+    } catch {
+        return false;
+    }
+}
+
+// Whether a Codex process other than the background server runs
+async function codexClientRuns() {
+    const pids = await ownPids();
+    const names = await Promise.all(pids.map(processName));
+    const codex = pids.filter((_pid, i) => names[i] === 'codex');
+    return (await Promise.all(codex.map(isCodexServer))).includes(false);
+}
+
 async function readJson(path) {
     const [bytes] = await Gio.File.new_for_path(path).load_contents_async(null);
     return JSON.parse(new TextDecoder().decode(bytes));
@@ -497,11 +526,7 @@ class Indicator extends PanelMenu.Button {
     // before the extension was enabled. Done once; after that the hooks keep the marks.
     async _adoptRunning() {
         const ids = new Set(this._rows.map(row => row.service.id));
-        const uid = new Gio.Credentials().get_unix_user();
-        const pids = (await listDir('/proc', 'standard::name,unix::uid'))
-            .filter(info => /^\d+$/.test(info.get_name()) &&
-                info.get_attribute_uint32('unix::uid') === uid)
-            .map(info => info.get_name());
+        const pids = await ownPids();
         const names = await Promise.all(pids.map(processName));
         pids.forEach((pid, i) => {
             if (ids.has(names[i]))
@@ -554,10 +579,16 @@ class Indicator extends PanelMenu.Button {
         this._scanning = true;
         try {
             const marks = (await listDir(RUNNING_DIR)).map(info => info.get_name());
+            let clientRuns = null;
             const alive = await Promise.all(marks.map(async name => {
                 const match = /^([a-z]+)-(\d+)$/.exec(name);
-                if (match && await processName(match[2]) === match[1])
-                    return match[1];
+                if (match && await processName(match[2]) === match[1]) {
+                    if (match[1] !== 'codex' || !await isCodexServer(match[2]))
+                        return match[1];
+                    clientRuns ??= codexClientRuns();
+                    if (await clientRuns)
+                        return match[1];
+                }
                 Gio.File.new_for_path(`${RUNNING_DIR}/${name}`)
                     .delete_async(GLib.PRIORITY_LOW, null).catch(() => {});
                 return null;

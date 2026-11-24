@@ -95,6 +95,9 @@ A dimmed battery means its data is over an hour old or the last request failed.
   in `~/.cache/token-batteries/running/`. Sessions that already run when the extension starts are
   found once in `/proc`. While sessions run, a 60 s check drops those that were killed.
 - **API fallback**: the usage endpoints are asked when you open the menu and the data is
+  Codex runs `SessionStart` with the first prompt, so its batteries appear then. Its shared
+  background server sends no `SessionEnd` when a terminal closes, so they hide at the next
+  check after the last Codex terminal is gone.
   older than 20 s, or every 15 minutes for a service in the bar without newer local data.
   After HTTP 429 a service backs off for 5 minutes, doubling up to 1 hour.
 
