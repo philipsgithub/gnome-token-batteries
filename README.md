@@ -88,16 +88,17 @@ A dimmed battery means its data is over an hour old or the last request failed.
 ## How it works
 
 - **Claude**: Claude Code passes `rate_limits` to its status line command, which saves them
-  to `~/.cache/token-batteries/claude-statusline.json`.
+  to `~/.cache/token-batteries/claude-statusline.json`. Idle sessions redraw their status line
+  with the limits of their last request, so older values never replace newer ones.
 - **Codex**: Codex logs the limits as `token_count` events in `~/.codex/sessions`. Its `Stop`
   hook tells the extension when to read the newest one.
 - **Running sessions**: `SessionStart` and `SessionEnd` hooks keep one empty file per session
   in `~/.cache/token-batteries/running/`. Sessions that already run when the extension starts are
   found once in `/proc`. While sessions run, a 60 s check drops those that were killed.
-- **API fallback**: the usage endpoints are asked when you open the menu and the data is
   Codex runs `SessionStart` with the first prompt, so its batteries appear then. Its shared
   background server sends no `SessionEnd` when a terminal closes, so they hide at the next
   check after the last Codex terminal is gone.
+- **API fallback**: the usage endpoints are asked when you open the menu and the data is
   older than 20 s, or every 15 minutes for a service in the bar without newer local data.
   After HTTP 429 a service backs off for 5 minutes, doubling up to 1 hour.
 
