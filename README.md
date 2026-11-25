@@ -3,6 +3,8 @@
 A GNOME Shell extension that shows how much of your Claude and Codex subscription limits
 is left, as battery icons in the top bar. Each service has a 5-hour and a weekly battery.
 
+![Top bar: Claude 72 % and 59 % left, Codex 5-hour empty and resetting in 1h 42m, Codex weekly 37 % left](screenshots/top-bar.png)
+
 - Shows the **remaining** quota, and when a 5-hour limit is empty, the time until it
   resets (`2h 16m`, `45m`).
 - Appears only while a `claude` or `codex` session runs, and hides otherwise (optional).
@@ -23,17 +25,34 @@ Accounts that use a pay-as-you-go API key have no 5-hour or weekly limits to sho
 
 ## Install
 
+Token Batteries is not on extensions.gnome.org, so install it from this repository:
+
 ```sh
 UUID=token-batteries@gnome-token-batteries
-git clone <url-of-this-repository> ~/.local/share/gnome-shell/extensions/$UUID
+git clone https://github.com/philipsgithub/gnome-token-batteries.git ~/.local/share/gnome-shell/extensions/$UUID
 ~/.local/share/gnome-shell/extensions/$UUID/install-hooks.py
 ```
+
+The folder must be named after the UUID, or GNOME Shell ignores it. `install-hooks.py`
+connects Claude Code and Codex (see [Connect your accounts](#connect-your-accounts)). It is
+safe to run again and skips what is already set up.
 
 Log out and back in so GNOME Shell finds the new extension, then enable it:
 
 ```sh
 gnome-extensions enable token-batteries@gnome-token-batteries
 ```
+
+Restart any `claude` or `codex` sessions that were already running, so they load the hooks.
+
+### Update
+
+```sh
+git -C ~/.local/share/gnome-shell/extensions/token-batteries@gnome-token-batteries pull
+```
+
+Changes to the hooks apply right away. GNOME Shell keeps running the old extension code until
+you log out and back in.
 
 ## Connect your accounts
 
@@ -79,6 +98,8 @@ a custom `CLAUDE_CONFIG_DIR` or `CODEX_HOME` is not supported.
 
 Click the indicator to see the exact values and reset times. These options are in the menu
 and in the preferences (`gnome-extensions prefs token-batteries@gnome-token-batteries`):
+
+<img src="screenshots/menu.png" alt="Open menu with the remaining quota and reset time of each window, where the data came from, and the options" width="300">
 
 - **Show in top bar**: choose which of the four batteries appear.
 - **Only while a session runs** (on by default): turn it off to always show the batteries.
